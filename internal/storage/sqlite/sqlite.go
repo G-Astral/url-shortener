@@ -15,7 +15,7 @@ type Storage struct {
 }
 
 func New(storagePath string) (*Storage, error) {
-	const op = "storage.sqliye.New"
+	const op = "storage.sqlite.New"
 
 	db, err := sql.Open("sqlite3", storagePath)
 	if err != nil {
@@ -65,3 +65,7 @@ func (s *Storage) SaveURL(urlToSave, alias string) (int64, error) {
 
 	return id, nil
 }
+
+// func (s *Storage) GetURL(alias string) (string, error) {
+	
+// }
