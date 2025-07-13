@@ -14,6 +14,7 @@ import (
 	"url-shortener/internal/storage"
 )
 
+//go:generate go run github.com/vektra/mockery/v2@v2.53.4 --name=URLDeletter
 type URLDeletter interface {
 	DeleteURL(alias string) error
 }
