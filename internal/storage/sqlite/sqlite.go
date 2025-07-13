@@ -108,6 +108,7 @@ func (s *Storage) DeleteURL(alias string) error {
 	if rowsAffected > 0 {
 		return nil
 	} else {
-		return sql.ErrNoRows
+		// return sql.ErrNoRows
+		return storage.ErrURLNotFound
 	}
 }

@@ -1,9 +1,10 @@
-package redirect
+package delete
 
 import (
 	"errors"
-	"net/http"
+	"fmt"
 	"log/slog"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -13,16 +14,13 @@ import (
 	"url-shortener/internal/storage"
 )
 
-// URLGetter is an interface for getting url by alias.
-//
-//go:generate go run github.com/vektra/mockery/v2@v2.53.4 --name=URLGetter
-type URLGetter interface {
-	GetURL(alias string) (string, error)
+type URLDeletter interface {
+	DeleteURL(alias string) error
 }
 
-func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
+func New(log *slog.Logger, urlDeletter URLDeletter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "handlers.url.redirect.New"
+		const op = "handlers.url.delete.New"
 
 		log := log.With(
 			slog.String("op", op),
@@ -36,7 +34,7 @@ func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
 			return
 		}
 
-		resURL, err := urlGetter.GetURL(alias)
+		err := urlDeletter.DeleteURL(alias)
 		if errors.Is(err, storage.ErrURLNotFound) {
 			log.Info("url not found", "alias", alias)
 			render.JSON(w, r, resp.Error("not found"))
@@ -48,9 +46,8 @@ func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
 			return
 		}
 
-		log.Info("got url", slog.String("url", resURL))
+		log.Info("url deleted")
 
-		// redirect to found url
-		http.Redirect(w, r, resURL, http.StatusFound)
+		render.JSON(w, r, fmt.Sprintf("url by alias: %s deleted", alias))
 	}
 }
