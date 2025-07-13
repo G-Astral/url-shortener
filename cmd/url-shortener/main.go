@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"url-shortener/internal/config"
+	"url-shortener/internal/http-server/handlers/url/save"
 	mwLogger "url-shortener/internal/http-server/middleware/logger"
 	"url-shortener/internal/lib/logger/handlers/slogpretty"
 	"url-shortener/internal/storage/sqlite"
@@ -30,7 +31,7 @@ func main() {
 
 	storage, err := sqlite.New(cfg.StoragePath)
 	if err != nil {
-		slog.Error("failed to init storage", "error", err)
+		log.Error("failed to init storage", "error", err)
 		os.Exit(1)
 	}
 
@@ -43,6 +44,8 @@ func main() {
 	router.Use(mwLogger.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
+
+	router.Post("/url", save.New(log, storage))
 
 	// TODO: run server:
 }
