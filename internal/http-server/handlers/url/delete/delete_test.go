@@ -38,9 +38,9 @@ func TestDeleteHandler(t *testing.T) {
 			expectedBody: fmt.Sprintf(`"url by alias: %s deleted"`, alias),
 		},
 		{
-			name:       "alias is empty",
-			aliasInURL: "",
-			mockSetup:  func(m *mocks.URLDeletter) {},
+			name:         "alias is empty",
+			aliasInURL:   "",
+			mockSetup:    func(m *mocks.URLDeletter) {},
 			expectedCode: http.StatusNotFound,
 			expectedBody: "",
 		},
@@ -52,7 +52,6 @@ func TestDeleteHandler(t *testing.T) {
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: `{"error":"not found", "status":"Error"}`,
-
 		},
 		{
 			name:       "internal error",
@@ -67,7 +66,7 @@ func TestDeleteHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			
+
 			mock := mocks.NewURLDeletter(t)
 			tt.mockSetup(mock)
 

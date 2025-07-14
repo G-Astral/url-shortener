@@ -15,6 +15,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -24,6 +25,12 @@ const (
 )
 
 func main() {
+	err := godotenv.Load("local.env")
+	if err != nil {
+		slog.Error("Error loading local.env file", "error", err)
+		os.Exit(1)
+	}
+
 	cfg := config.MustLoad()
 
 	log := setupLogger(cfg.Env)
@@ -47,9 +54,15 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	router.Post("/url", save.New(log, storage))
+	router.Route("/url", func(r chi.Router) {
+		r.Use(middleware.BasicAuth("url-shortener", map[string]string{
+			cfg.HTTPServer.User: cfg.HTTPServer.Password,
+		}))
+		r.Post("/", save.New(log, storage))
+		r.Delete("/{alias}", delete.New(log, storage))
+	})
+	
 	router.Get("/{alias}", redirect.New(log, storage))
-	router.Delete("/{alias}", delete.New(log, storage))
 
 	log.Info("starting server", slog.String("address", cfg.Address))
 
