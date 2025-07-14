@@ -49,6 +49,10 @@ func New(log *slog.Logger, urlDeletter URLDeletter) http.HandlerFunc {
 
 		log.Info("url deleted")
 
-		render.JSON(w, r, fmt.Sprintf("url by alias: %s deleted", alias))
+		render.JSON(w, r, map[string]string{
+			"status": "OK",
+			"message": fmt.Sprintf("url by alias: %s deleted", alias),
+		})
+
 	}
 }
